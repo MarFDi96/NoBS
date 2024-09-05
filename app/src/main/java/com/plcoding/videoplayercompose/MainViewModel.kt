@@ -19,11 +19,11 @@ class MainViewModel @Inject constructor(
     private val metaDataReader: MetaDataReader
 ): ViewModel() {
 
-    private val videoUris = savedStateHandle.getStateFlow("videoUris", emptyList<Uri>())
+    private val audioUris = savedStateHandle.getStateFlow("audioUris", emptyList<Uri>())
 
-    val videoItems = videoUris.map { uris ->
+    val audioItems = audioUris.map { uris ->
         uris.map { uri ->
-            VideoItem(
+            AudioItem(
                 contentUri = uri,
                 mediaItem = MediaItem.fromUri(uri),
                 name = metaDataReader.getMetaDataFromUri(uri)?.fileName ?: "No name"
@@ -35,14 +35,14 @@ class MainViewModel @Inject constructor(
         player.prepare()
     }
 
-    fun addVideoUri(uri: Uri) {
-        savedStateHandle["videoUris"] = videoUris.value + uri
+    fun addAudioUri(uri: Uri) {
+        savedStateHandle["audioUris"] = audioUris.value + uri
         player.addMediaItem(MediaItem.fromUri(uri))
     }
 
-    fun playVideo(uri: Uri) {
+    fun playAudio(uri: Uri) {
         player.setMediaItem(
-            videoItems.value.find { it.contentUri == uri }?.mediaItem ?: return
+            audioItems.value.find { it.contentUri == uri }?.mediaItem ?: return
         )
     }
 

@@ -23,13 +23,13 @@ class MetaDataReaderImpl(
         val fileName = app.contentResolver
             .query(
                 contentUri,
-                arrayOf(MediaStore.Video.VideoColumns.DISPLAY_NAME),
+                arrayOf(MediaStore.Audio.AudioColumns.DISPLAY_NAME),
                 null,
                 null,
                 null,
             )
             ?.use { cursor ->
-                val index = cursor.getColumnIndex(MediaStore.Video.VideoColumns.DISPLAY_NAME)
+                val index = cursor.getColumnIndex(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
                 cursor.moveToFirst()
                 cursor.getString(index)
             }
