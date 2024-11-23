@@ -8,20 +8,22 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
-@InstallIn(ViewModelComponent::class)
+@InstallIn(SingletonComponent::class)
 object AudioPlayerModule {
 
-    @Provides
-    @ViewModelScoped
+   @Provides
+    @Singleton
     fun provideVideoPlayer(app: Application): Player {
         return ExoPlayer.Builder(app)
             .build()
     }
 
     @Provides
-    @ViewModelScoped
+    @Singleton
     fun provideMetaDataReader(app: Application): MetaDataReader {
         return MetaDataReaderImpl(app)
     }

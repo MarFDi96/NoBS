@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -41,14 +42,14 @@ fun nobsPlayer ()
 {
     AudioPlayerComposeTheme {
         val viewModel = hiltViewModel<MainViewModel>()
-        val videoItems by viewModel.audioItems.collectAsState()
+        val songItems by viewModel.audioItems.collectAsState()
         val selectVideoLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent(),
             onResult = { uri ->
                 uri?.let(viewModel::addAudioUri)
             }
         )
-        var lifecycle by remember {
+        var lifecycle by rememberSaveable {
             mutableStateOf(Lifecycle.Event.ON_CREATE)
         }
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -78,11 +79,11 @@ fun nobsPlayer ()
                 update = {
                     when (lifecycle) {
                         Lifecycle.Event.ON_PAUSE -> {
-                            it.onPause()
-                            it.player?.pause()
+                            //it.onPause()
+                            //it.player?.pause()
                         }
                         Lifecycle.Event.ON_RESUME -> {
-                            it.onResume()
+                            //it.onResume()
                         }
                         else -> Unit
                     }
@@ -104,7 +105,7 @@ fun nobsPlayer ()
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(videoItems) { item ->
+                items(songItems) { item ->
                     Text(
                         text = item.name,
                         modifier = Modifier
