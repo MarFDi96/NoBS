@@ -1,5 +1,6 @@
 package com.plcoding.videoplayercompose
 
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -43,12 +44,6 @@ fun nobsPlayer ()
     AudioPlayerComposeTheme {
         val viewModel = hiltViewModel<MainViewModel>()
         val songItems by viewModel.audioItems.collectAsState()
-        val selectVideoLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
-            onResult = { uri ->
-                uri?.let(viewModel::addAudioUri)
-            }
-        )
         var lifecycle by rememberSaveable {
             mutableStateOf(Lifecycle.Event.ON_CREATE)
         }
@@ -94,7 +89,8 @@ fun nobsPlayer ()
             )
             Spacer(modifier = Modifier.height(8.dp))
             IconButton(onClick = {
-                selectVideoLauncher.launch("audio/mpeg")
+                viewModel.scanForAudioFiles()
+
             }) {
                 Icon(
                     imageVector = Icons.Default.FileOpen,

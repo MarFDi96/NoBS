@@ -1,6 +1,11 @@
 package com.plcoding.videoplayercompose
 
+import android.app.AlertDialog
+import android.content.ComponentName
+import android.content.DialogInterface
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -40,9 +45,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
@@ -50,25 +59,50 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.plcoding.videoplayercompose.ui.theme.AudioPlayerComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var controllerFuture: ListenableFuture<MediaController>
+    private lateinit var controller: MediaController
+    private val REQUEST_CODE = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             // todo: ver si dejo el player en el home, y si lo hago, que quede en el medio de la navbar
             // reminder; que el fondo sea customizable en el config de la app
-            // osea el video player lo meto en una funcion aparte y la llamo acá
-            // todo: hacer que el player funcione de servicio o en foreground, probablemente foreground
 
             BottomNavBar()
 
 
         }
     }
+    override fun onStart() {
+        super.onStart()
+        val sessionToken = SessionToken(this, ComponentName(this, MediaPlayerService::class.java))
+        controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
+        controllerFuture.addListener(
+            {
+                controller = controllerFuture.get()
+                },
+            MoreExecutors.directExecutor()
+        )
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_CODE
+            )
+        } else {
+            // Permission granted
+            Log.d("AudioPlayer", "Permission granted")
+        }
+    }
 }
+
 
 @Composable
 fun BottomNavBar() {
