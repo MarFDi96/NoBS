@@ -40,7 +40,7 @@ import androidx.media3.ui.PlayerView
 //Not exactly home since this is just going to be the list of songs to pick
 //disregard past comment, this screen will just house the player
 @Composable
-fun Home(){
+fun Home(viewModel: MainViewModel){
 
     Box(modifier = Modifier.fillMaxSize()){
         Column(modifier = Modifier
@@ -48,7 +48,7 @@ fun Home(){
             .align(Alignment.Center),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally){
-            nobsPlayer()
+            nobsPlayer(viewModel)
         //Text (text = "placeholder home screen")
         }
     }

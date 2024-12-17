@@ -1,5 +1,6 @@
 package com.plcoding.videoplayercompose
 
+import android.graphics.Color
 import android.graphics.Paint.Align
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,3 +23,4 @@ fun Options(){
         }
     }
 }
+

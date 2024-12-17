@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -39,11 +41,11 @@ import androidx.navigation.compose.rememberNavController
 import com.plcoding.videoplayercompose.ui.theme.AudioPlayerComposeTheme
 
 @Composable
-fun nobsPlayer ()
+fun nobsPlayer (viewModel: MainViewModel)
 {
     AudioPlayerComposeTheme {
-        val viewModel = hiltViewModel<MainViewModel>()
-        val songItems by viewModel.audioItems.collectAsState()
+        //val viewModel = hiltViewModel<MainViewModel>()
+        val queuedTracks by viewModel.trackItems.collectAsState()
         var lifecycle by rememberSaveable {
             mutableStateOf(Lifecycle.Event.ON_CREATE)
         }
@@ -87,27 +89,21 @@ fun nobsPlayer ()
                     .fillMaxWidth()
                     .aspectRatio(16 / 9f)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            IconButton(onClick = {
-                viewModel.scanForAudioFiles()
 
-            }) {
-                Icon(
-                    imageVector = Icons.Default.FileOpen,
-                    contentDescription = "Select song"
-                )
-            }
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Now playing",
+                modifier = Modifier.align(Alignment.CenterHorizontally))
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(songItems) { item ->
+                items(queuedTracks) { mediaItem ->
                     Text(
-                        text = item.name,
+                        text = mediaItem.name,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                viewModel.playAudio(item.contentUri)
+                                viewModel.jumpToTrack(queuedTracks.indexOf(mediaItem))
                             }
                             .padding(16.dp)
                     )

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.media.audiofx.Equalizer
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -26,6 +27,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.FileOpen
@@ -73,12 +76,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            // todo: ver si dejo el player en el home, y si lo hago, que quede en el medio de la navbar
-            // reminder; que el fondo sea customizable en el config de la app
+            AudioPlayerComposeTheme {
+                // todo: ver si dejo el player en el home, y si lo hago, que quede en el medio de la navbar
+                // reminder; que el fondo sea customizable en el config de la app
 
-            BottomNavBar()
+                BottomNavBar()
 
-
+            }
         }
     }
     override fun onStart() {
@@ -96,6 +100,26 @@ class MainActivity : ComponentActivity() {
                 arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
                 REQUEST_CODE
             )
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                AlertDialog.Builder(this)
+                    .setTitle("Permission needed")
+                    .setMessage("Required to access audio files")
+                    .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which -> ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1) })
+                    .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
+                    .create().show()
+            } else {
+                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+            }
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, android.Manifest.permission.READ_MEDIA_AUDIO)) {
+                AlertDialog.Builder(this)
+                    .setTitle("Permission needed")
+                    .setMessage("Required to access audio files")
+                    .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which -> ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 1) })
+                    .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
+                    .create().show()
+            } else {
+                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 1)
+            }
         } else {
             // Permission granted
             Log.d("AudioPlayer", "Permission granted")
@@ -108,6 +132,7 @@ class MainActivity : ComponentActivity() {
 fun BottomNavBar() {
     val navigationController = rememberNavController()
     val context = LocalContext.current.applicationContext
+    val viewModel = hiltViewModel<MainViewModel>()
     val selected = remember {
         mutableStateOf(Icons.Default.Home)
     }
@@ -119,7 +144,7 @@ fun BottomNavBar() {
             ) {
                 IconButton(
                     onClick = {
-                        selected.value = Icons.Default.Home
+                        selected.value = Icons.Default.Audiotrack
                         navigationController.navigate(Screens.Home.screen) {
                             popUpTo(0)
                         }
@@ -128,10 +153,28 @@ fun BottomNavBar() {
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = null,
-                        tint = if (selected.value == Icons.Default.Home) Color.White else Color.DarkGray
+                        imageVector = Icons.Default.Audiotrack,
+                        contentDescription = "Player",
+                        tint = if (selected.value == Icons.Default.Audiotrack) Color.White else Color.DarkGray
                     )
+                }
+
+                IconButton(
+                    onClick = {
+                        selected.value = Icons.Default.Dashboard
+                        navigationController.navigate(Screens.Playlists.screen) {
+                            popUpTo(0)
+                        }
+
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Dashboard,
+                        contentDescription = "Music Library",
+                        tint = if (selected.value == Icons.Default.Dashboard) Color.White else Color.DarkGray
+                    )
+
                 }
 
                 IconButton(
@@ -146,7 +189,7 @@ fun BottomNavBar() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Equalizer,
-                        contentDescription = null,
+                        contentDescription = "Equalizer",
                         tint = if (selected.value == Icons.Default.Equalizer) Color.White else Color.DarkGray
                     )
 
@@ -164,26 +207,8 @@ fun BottomNavBar() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = null,
+                        contentDescription = "Options",
                         tint = if (selected.value == Icons.Default.Settings) Color.White else Color.DarkGray
-                    )
-
-                }
-
-                IconButton(
-                    onClick = {
-                        selected.value = Icons.Default.FeaturedPlayList
-                        navigationController.navigate(Screens.Playlists.screen) {
-                            popUpTo(0)
-                        }
-
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FeaturedPlayList,
-                        contentDescription = null,
-                        tint = if (selected.value == Icons.Default.FeaturedPlayList) Color.White else Color.DarkGray
                     )
 
                 }
@@ -193,12 +218,12 @@ fun BottomNavBar() {
     ) { paddingValues ->
         NavHost(
             navController = navigationController,
-            startDestination = Screens.Home.screen,
+            startDestination = Screens.Playlists.screen,
             modifier = Modifier.padding(paddingValues)) {
-            composable(Screens.Home.screen) { Home() }
-            composable(Screens.Equalizer.screen) { Equalizer() }
+            composable(Screens.Home.screen) { Home(viewModel) }
+            composable(Screens.Playlists.screen) { Playlists(navigationController, viewModel) }
+            composable(Screens.Equalizer.screen) {Equalizer() }
             composable(Screens.Options.screen) { Options() }
-            composable(Screens.Playlists.screen) { Playlists() }
         }
     }
 }
