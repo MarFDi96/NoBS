@@ -77,8 +77,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AudioPlayerComposeTheme {
-                // todo: ver si dejo el player en el home, y si lo hago, que quede en el medio de la navbar
-                // reminder; que el fondo sea customizable en el config de la app
 
                 BottomNavBar()
 

@@ -15,6 +15,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -67,6 +68,48 @@ class MainViewModel @Inject constructor(
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    /*val trackItems = trackUris.map { uris ->
+        uris.map { uri ->
+            AudioItem(
+                contentUri = uri,
+                //mediaItem = MediaItem.fromUri(uri),
+                mediaItem = MediaItem.Builder()
+                    .setUri(uri)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(metaDataReader.getMetaDataFromUri(uri)?.title)
+                            .setArtist(metaDataReader.getMetaDataFromUri(uri)?.artist)
+                            .setAlbumTitle(metaDataReader.getMetaDataFromUri(uri)?.album)
+                            .setArtworkUri(metaDataReader.getMetaDataFromUri(uri)?.albumArt?.let { Uri.parse(it.toString()) })
+                            .build()
+                    )
+                    .build(),
+                name = metaDataReader.getMetaDataFromUri(uri)?.title ?: metaDataReader.getMetaDataFromUri(uri)?.fileName ?: "No name"
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
+    val audioItems = audioUris.map { uris ->
+        uris.map { uri ->
+            AudioItem(
+                contentUri = uri,
+                //mediaItem = MediaItem.fromUri(uri),
+                mediaItem = MediaItem.Builder()
+                    .setUri(uri)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(metaDataReader.getMetaDataFromUri(uri)?.title)
+                            .setArtist(metaDataReader.getMetaDataFromUri(uri)?.artist)
+                            .setAlbumTitle(metaDataReader.getMetaDataFromUri(uri)?.album)
+                            .setArtworkUri(metaDataReader.getMetaDataFromUri(uri)?.albumArt?.let { Uri.parse(it.toString()) })
+                            .build()
+                    )
+                    .build(),
+                name = metaDataReader.getMetaDataFromUri(uri)?.title ?: metaDataReader.getMetaDataFromUri(uri)?.fileName ?: "No name"
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())*/
 
     init {
             scanForAudioFiles()
@@ -161,7 +204,6 @@ class MainViewModel @Inject constructor(
             // Deserialize playlist data from preferences
             val playlistMap = mutableMapOf<String, List<Uri>>()
             for (playlistName in preferences.asMap().keys) {
-                // Assuming playlist names are stored as keys and track URIs as a string set
                 val trackUris = preferences[stringSetPreferencesKey(playlistName.toString())]
                     ?.map { Uri.parse(it) } ?: emptyList()
                 playlistMap[playlistName.toString()] = trackUris
@@ -178,6 +220,12 @@ class MainViewModel @Inject constructor(
         }
         viewModelScope.launch {
             savePlaylists() // Save playlists after creation
+        }
+    }
+    fun deletePlaylist(playlistName: String) {
+        _playlists.update { it - playlistName }
+        viewModelScope.launch {
+            savePlaylists()
         }
     }
 
@@ -213,6 +261,22 @@ class MainViewModel @Inject constructor(
                 // Store playlist names as keys and track URIs as a string set
                 preferences[stringSetPreferencesKey(playlistName)] =
                     trackUris.map { it.toString() }.toSet()
+            }
+        }
+    }
+
+    fun playPlaylist(playlistName: String) {
+        viewModelScope.launch {
+            val trackUris = playlists.value[playlistName] ?: emptyList()
+            clearTrackUris()
+            player.clearMediaItems()
+
+            trackUris.forEach { uri ->
+                addTrackToPlaylist(uri)
+            }
+
+            if (trackUris.isNotEmpty()) {
+                jumpToTrack(0)
             }
         }
     }

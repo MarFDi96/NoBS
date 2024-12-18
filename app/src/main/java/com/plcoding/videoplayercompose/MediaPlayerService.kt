@@ -53,6 +53,7 @@ class MediaPlayerService : MediaSessionService(), MediaSession.Callback {
                         equalizer?.enabled = true
                     }
                 })
+
                 player.play()
 
             }
@@ -62,6 +63,7 @@ class MediaPlayerService : MediaSessionService(), MediaSession.Callback {
                 if (trackIndex != -1) {
                     // Perform the jump using ExoPlayer:
                     player.seekTo(trackIndex, 0L)
+                    player.play()
                 }
             }
 
