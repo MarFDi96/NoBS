@@ -88,7 +88,7 @@ fun nobsPlayer (viewModel: MainViewModel){
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                //.fillMaxSize()
                 .padding(16.dp)
         ) {
             AndroidView(

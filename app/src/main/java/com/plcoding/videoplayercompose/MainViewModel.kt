@@ -48,6 +48,7 @@ class MainViewModel @Inject constructor(
     private val _playlists = MutableStateFlow<Map<String, List<Uri>>>(emptyMap())
     val playlists: StateFlow<Map<String, List<Uri>>> = _playlists.asStateFlow()
 
+//current playlist
     val trackItems = trackUris.map { uris ->
         uris.map { uri ->
             AudioItem(
@@ -58,7 +59,7 @@ class MainViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-
+//whole song list
     val audioItems = audioUris.map { uris ->
         uris.map { uri ->
             AudioItem(

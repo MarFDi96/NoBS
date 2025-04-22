@@ -2,6 +2,7 @@ package com.plcoding.videoplayercompose
 
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.SurfaceCoroutineScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -48,10 +49,13 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.accompanist.pager.PagerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun Playlists(navigationController: NavController, viewModel: MainViewModel) {
+fun Playlists(pager: PagerState, viewModel: MainViewModel, scope: CoroutineScope) {
     //val viewModel = hiltViewModel<MainViewModel>()
     val songItems by viewModel.audioItems.collectAsState()
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
@@ -125,9 +129,12 @@ fun Playlists(navigationController: NavController, viewModel: MainViewModel) {
                                 onClick = {
                                     viewModel.clearTrackUris()
                                     viewModel.playAudio(item.contentUri)
-                                    navigationController.navigate(Screens.Home.screen) {
-                                        popUpTo(0)
+                                    scope.launch {
+                                        pager.animateScrollToPage(0)
                                     }
+//                                    navigationController.navigate(Screens.Home.screen) {
+//                                        popUpTo(0)
+//                                    }
                                 },
                                 onLongClick = {
                                     selectedItem = item
